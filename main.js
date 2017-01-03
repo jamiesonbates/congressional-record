@@ -124,6 +124,7 @@ app.get('/scrape', (req, res) => {
     });
   }
 
+// Clean Data
   const select = function(text) {
     return text = text.slice(text.search(/[A-Z]{2}$/), text.search(/[__]{2}/));
   }
