@@ -83,28 +83,26 @@ app.get('/scrape', (req, res) => {
         url = host + attr;
         console.log(url);
       }
-      final(url);
+      fifth(url);
     })
   }
 
-  const final = function(url) {
+  const fifth = function(url) {
     console.log('final');
     request(url, (err, response, html) => {
       if (!err) {
         const $ = cheerio.load(html);
+        const moreLinks = $('a:contains("More")');
+        console.log(moreLinks);
 
-        const links = $(`a:contains('Text')`);
-
-        for (const element in links) {
-          if (!(links[element].attribs === undefined)) {
-            results.push(links[element].attribs.href);
-          }
-        }
-        results.pop();
-        getData(results);
-      }
-    });
+        const secondMore = moreLinks[1];
+        console.log(secondMore);
   }
+  // for (const element in links) {
+  //   if (!(links[element].attribs === undefined)) {
+  //     results.push(links[element].attribs.href);
+  //   }
+  // }
 
   const getData = function(results) {
     console.log('getData');
@@ -113,29 +111,27 @@ app.get('/scrape', (req, res) => {
         if (!err) {
           const $ = cheerio.load(html);
           let text = $('pre').text();
-          const title = extractTitle(text);
-          text =
+          // const title = extractTitle(text);
+          // text = cleanData(text);
 
 
-          data.push({ url: result, content: text, title: title});
+          data.push({ url: result, content: text});
         }
-        console.log(data);
+        // console.log(data);
       });
     });
   }
 
-// Clean Data
-  const select = function(text) {
-    return text = text.slice(text.search(/[A-Z]{2}$/), text.search(/[__]{2}/));
-  }
+  // const cleanData = function(text) {
+  //   // console.log('here');
+  //   text = text.slice(text.search(/[A-Z]{2}/), text.search(/[__]{2}/));
+  //   text = text.replace(/\r?\n|\r/g, '');
+  //   return text;
+  // }
 
-  const removeNewLines = function(text) {
-    return text = text.replace(/\r?\n|\r/g, '');
-  }
-
-  const extractTitle = function(text) {
-    return text.slice(text.search(/[A-Z]{2}/), text.indexOf('\n') - 1);
-  }
+  // const extractTitle = function(text) {
+  //   return text.slice(text.search(/[A-Z]{2}/), text.lastIndexOf(, - 1);
+  // }
   first(url);
 });
 
