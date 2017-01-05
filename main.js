@@ -88,21 +88,65 @@ app.get('/scrape', (req, res) => {
   }
 
   const fifth = function(url) {
-    console.log('final');
+    console.log('fifth');
     request(url, (err, response, html) => {
       if (!err) {
         const $ = cheerio.load(html);
-        const moreLinks = $('a:contains("More")');
-        console.log(moreLinks);
 
-        const secondMore = moreLinks[1];
-        console.log(secondMore);
+        const links = $(`a:contains('More')`);
+
+        for (const element in links) {
+          if (!(links[element].attribs === undefined)) {
+            results.push(links[element].attribs.href);
+          }
+        }
+
+        sixth(results);
+      }
+    });
   }
-  // for (const element in links) {
-  //   if (!(links[element].attribs === undefined)) {
-  //     results.push(links[element].attribs.href);
-  //   }
-  // }
+
+  const sixth = function(arr) {
+    console.log('sixth');
+    for (const subUrl of arr) {
+      url = host + '/fdsys/' + subUrl;
+      request(url, (err, response, html) => {
+        if (!err) {
+          const $ = cheerio.load(html);
+
+          const $tables = $('table.page-details-budget-metadata-table');
+          const text = $tables.find(`a:contains('Text')`).attr('href');
+          const pdf = $tables.find(`a:contains('PDF')`).attr('href');
+          const mods = $tables.find(`a:contains('MODS')`).attr('href');
+
+          const category = $tables.find(`tr td:contains('Category')`).next().text();
+          const collection = $tables.find(`tr td:contains('Collection')`).next().text();
+          const publicationTitle = $tables.find(`tr td:contains('Publication Title')`).next().text().trim();
+          const suDocClassNumber = $tables.find(`tr td:contains('SuDoc Class Number')`).next().text();
+          const publisher = $tables.find(`tr td:contains('Publisher')`).next().text();
+          const pageNumberRange = $tables.find(`tr td:contains('Page Number Range')`).next().text();
+          const congress = $tables.find(`tr td:contains('Congress')`).next().text();
+          const time = $tables.find(`tr td:contains('Time')`).next().text().trim();
+          const section = $tables.find(`tr td:contains('Section')`).next().text();
+          const subType = $tables.find(`tr td:contains('Sub Type')`).next().text();
+          const speakingCongressMember = $tables.find(`tr td:contains('Speaking Congress Member')`).next().text();
+
+          // const $linksTable = $tables['3'];
+          // console.log($linksTable);
+          // const $infoTable = $tables['4'];
+          //
+          // if ($linksTable) {
+          //   const textUrl = $linksTable.find(`a:contains('Text')`).attr('href');
+          //   const pdfUrl = $linksTable.find(`a:contains('PDF')`).attr('href');
+          //   const modsUrl = $linksTable.find(`a:contains('MODS')`).attr('href');
+          //   console.log(textUrl);
+          //   console.log(pdfUrl);
+          //   console.log(modsUrl);
+          // }
+        }
+      });
+    }
+  }
 
   const getData = function(results) {
     console.log('getData');
