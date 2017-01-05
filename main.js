@@ -121,12 +121,14 @@ app.get('/scrape', (req, res) => {
 
           const category = $tables.find(`tr td:contains('Category')`).next().text();
           const collection = $tables.find(`tr td:contains('Collection')`).next().text();
-          const publicationTitle = $tables.find(`tr td:contains('Publication Title')`).next().text().trim();
+          const publicationTitle = $tables.find(`tr td:contains('Publication Title')`).next().text().trim().replace(/([\s]{2,})/g, ' ');
+          console.log(publicationTitle);
           const suDocClassNumber = $tables.find(`tr td:contains('SuDoc Class Number')`).next().text();
           const publisher = $tables.find(`tr td:contains('Publisher')`).next().text();
           const pageNumberRange = $tables.find(`tr td:contains('Page Number Range')`).next().text();
           const congress = $tables.find(`tr td:contains('Congress')`).next().text();
-          const time = $tables.find(`tr td:contains('Time')`).next().text().trim();
+          const time = $tables.find(`tr td:contains('Time')`).next().text().trim().replace(/([\s]{2,})/g, ' ');
+          console.log(time);
           const section = $tables.find(`tr td:contains('Section')`).next().text();
           const subType = $tables.find(`tr td:contains('Sub Type')`).next().text();
           const speakingCongressMember = $tables.find(`tr td:contains('Speaking Congress Member')`).next().text();
