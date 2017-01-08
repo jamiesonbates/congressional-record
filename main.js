@@ -115,39 +115,50 @@ app.get('/scrape', (req, res) => {
           const $ = cheerio.load(html);
 
           const $tables = $('table.page-details-budget-metadata-table');
+
+          const title = $('h3.page-title').text();
+
           const text = $tables.find(`a:contains('Text')`).attr('href');
-          console.log(text);
           const pdf = $tables.find(`a:contains('PDF')`).attr('href');
           const mods = $tables.find(`a:contains('MODS')`).attr('href');
 
           const category = $tables.find(`tr td:contains('Category')`).next().text();
           const collection = $tables.find(`tr td:contains('Collection')`).next().text();
           const publicationTitle = $tables.find(`tr td:contains('Publication Title')`).next().text().trim().replace(/([\s]{2,})/g, ' ');
-          console.log(publicationTitle);
           const suDocClassNumber = $tables.find(`tr td:contains('SuDoc Class Number')`).next().text();
           const publisher = $tables.find(`tr td:contains('Publisher')`).next().text();
           const pageNumberRange = $tables.find(`tr td:contains('Page Number Range')`).next().text();
-          console.log(pageNumberRange);
           const congress = $tables.find(`tr td:contains('Congress')`).next().text();
-          console.log(congress);
           const time = $tables.find(`tr td:contains('Time')`).next().text().trim().replace(/([\s]{2,})/g, ' ');
-          console.log(time);
           const section = $tables.find(`tr td:contains('Section')`).next().text();
           const subType = $tables.find(`tr td:contains('Sub Type')`).next().text();
           const speakingCongressMember = $tables.find(`tr td:contains('Speaking Congress Member')`).next().text();
 
-          // const $linksTable = $tables['3'];
-          // console.log($linksTable);
-          // const $infoTable = $tables['4'];
-          //
-          // if ($linksTable) {
-          //   const textUrl = $linksTable.find(`a:contains('Text')`).attr('href');
-          //   const pdfUrl = $linksTable.find(`a:contains('PDF')`).attr('href');
-          //   const modsUrl = $linksTable.find(`a:contains('MODS')`).attr('href');
-          //   console.log(textUrl);
-          //   console.log(pdfUrl);
-          //   console.log(modsUrl);
-          // }
+          data.push({
+            statement: {
+              publication_title: publicationTitle,
+              title: title,
+              speaker: speakingCongressMember,
+              date: `${date}, ${year}`,
+              time: time,
+              page_number_range: pageNumberRange,
+              congressional_body: section,
+              congress: congress
+            },
+            urls: {
+              text: text,
+              pdf: pdf,
+              mods: mods
+            },
+            meta: {
+                collection_category: category,
+                collection: collection,
+                sudoc_class_number: suDocClassNumber,
+                publisher: publisher,
+                sub_type: subType
+            }
+          })
+          console.log(data);
         }
       });
     }
