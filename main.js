@@ -109,6 +109,7 @@ app.get('/scrape', (req, res) => {
   const sixth = function(arr) {
     console.log('sixth');
     for (const subUrl of arr) {
+      let statement;
       url = host + '/fdsys/' + subUrl;
       request(url, (err, response, html) => {
         if (!err) {
@@ -118,7 +119,7 @@ app.get('/scrape', (req, res) => {
 
           const title = $('h3.page-title').text();
 
-          const text = $tables.find(`a:contains('Text')`).attr('href');
+          const textUrl = $tables.find(`a:contains('Text')`).attr('href');
           const pdf = $tables.find(`a:contains('PDF')`).attr('href');
           const mods = $tables.find(`a:contains('MODS')`).attr('href');
 
@@ -134,7 +135,7 @@ app.get('/scrape', (req, res) => {
           const subType = $tables.find(`tr td:contains('Sub Type')`).next().text();
           const speakingCongressMember = $tables.find(`tr td:contains('Speaking Congress Member')`).next().text();
 
-          data.push({
+          statement = {
             statement: {
               publication_title: publicationTitle,
               title: title,
@@ -143,10 +144,11 @@ app.get('/scrape', (req, res) => {
               time: time,
               page_number_range: pageNumberRange,
               congressional_body: section,
-              congress: congress
+              congress: congress,
+              text: ''
             },
-            urls: {
-              text: text,
+            url: {
+              textUrl: textUrl,
               pdf: pdf,
               mods: mods
             },
@@ -157,41 +159,31 @@ app.get('/scrape', (req, res) => {
                 publisher: publisher,
                 sub_type: subType
             }
-          })
-          console.log(data);
+          };
+          // console.log(statement);
         }
       });
     }
+
+    // for (const dat of data) {
+    //   dat.statement.text = getText(dat.url.textUrl);
+    //   console.log(data);
+    // }
   }
 
-  const getData = function(results) {
-    console.log('getData');
-    results.forEach((result, index) => {
-      request(result, (err, response, html) => {
-        if (!err) {
-          const $ = cheerio.load(html);
-          let text = $('pre').text();
-          // const title = extractTitle(text);
-          // text = cleanData(text);
+  const getText = function(url) {
+    console.log('getText');
+    request(url, (err, response, html) => {
+      if (!err) {
+        const $ = cheerio.load(html);
 
+        const text = $('pre').text();
 
-          data.push({ url: result, content: text});
-        }
-        // console.log(data);
-      });
+        return text;
+      }
     });
   }
 
-  // const cleanData = function(text) {
-  //   // console.log('here');
-  //   text = text.slice(text.search(/[A-Z]{2}/), text.search(/[__]{2}/));
-  //   text = text.replace(/\r?\n|\r/g, '');
-  //   return text;
-  // }
-
-  // const extractTitle = function(text) {
-  //   return text.slice(text.search(/[A-Z]{2}/), text.lastIndexOf(, - 1);
-  // }
   first(url);
 });
 
