@@ -116,6 +116,7 @@ app.get('/scrape', (req, res) => {
 
           const $tables = $('table.page-details-budget-metadata-table');
           const text = $tables.find(`a:contains('Text')`).attr('href');
+          console.log(text);
           const pdf = $tables.find(`a:contains('PDF')`).attr('href');
           const mods = $tables.find(`a:contains('MODS')`).attr('href');
 
@@ -126,7 +127,9 @@ app.get('/scrape', (req, res) => {
           const suDocClassNumber = $tables.find(`tr td:contains('SuDoc Class Number')`).next().text();
           const publisher = $tables.find(`tr td:contains('Publisher')`).next().text();
           const pageNumberRange = $tables.find(`tr td:contains('Page Number Range')`).next().text();
+          console.log(pageNumberRange);
           const congress = $tables.find(`tr td:contains('Congress')`).next().text();
+          console.log(congress);
           const time = $tables.find(`tr td:contains('Time')`).next().text().trim().replace(/([\s]{2,})/g, ' ');
           console.log(time);
           const section = $tables.find(`tr td:contains('Section')`).next().text();
