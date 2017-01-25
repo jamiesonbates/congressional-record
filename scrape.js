@@ -118,6 +118,7 @@ app.get('/scrape', (req, res) => {
   return getHTML(url)
     .then((html) => {
       // Scrape 1st Page - Layer 1
+      console.log('layer 1');
       const $ = cheerio.load(html);
 
       attr = $(`a:contains(${year})`).attr('onclick').slice(12, 119);
@@ -128,6 +129,7 @@ app.get('/scrape', (req, res) => {
     })
     .then((html) => {
       // Scrape 2nd Page - Layer 2
+      console.log('layer 2');
       const $ = cheerio.load(html);
 
       attr = $(`a:contains(${month})`).attr('onclick').slice(12, 124);
@@ -138,6 +140,7 @@ app.get('/scrape', (req, res) => {
     })
     .then((html) => {
       // Scrape 3rd Page - Layer 3
+      console.log('layer 3');
       const $ = cheerio.load(html);
 
       attr = $(`a:contains(${date})`).attr('onclick').slice(12, 140);
@@ -148,6 +151,7 @@ app.get('/scrape', (req, res) => {
     })
     .then((html) => {
       // Scrape 4th Page - Layer 4
+      console.log('layer 4');
       const $ = cheerio.load(html);
 
       attr = $(`a:contains(${body})`).attr('onclick').slice(12, 170);
@@ -158,42 +162,38 @@ app.get('/scrape', (req, res) => {
     })
     .then((html) => {
       // Scrape 5th Page - Layer 5
+      console.log('layer 5');
       const $ = cheerio.load(html);
 
       const links = $(`a:contains('More')`);
 
       for (const element in links) {
+        console.log(element);
         if (!(links[element].attribs === undefined)) {
           results.push(host + '/fdsys/' + links[element].attribs.href);
         }
       }
 
       // pop off last url because it is undefined
-      results.pop();
-
-      const thisPromise = new Promise((resolve, reject) => {
-        for (const url of results) {
-          extractData(url)
-            .then((statement) => {
-              return getText(statement);
-            })
-            .then((statement) => {
-              // console.log(statement);
-              data.push(statement);
-              // console.log(data);
-            })
-            .catch((err) => {
-              console.log(err);
-            });
-        }
-
-        resolve(data);
-      });
-
-      return thisPromise;
+      // results.pop();
+      // const res = [];
+      // console.log(results);
+      // for (const url of results) {
+      //   res.push(extractData(url))
+      // }
+      // return Promise.all(res);
     })
-    .then((data) => {
-      console.log(data);
+    .then((statement) => {
+      console.log(statement);
+      return getText(statement);
+    })
+    .then((statement) => {
+      console.log(statement);
+      data.push(statement);
+      // console.log(data);
+    })
+    .catch((err) => {
+      console.log(err);
     })
     .catch((err) => {
       console.log(err);
