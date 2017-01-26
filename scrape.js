@@ -93,6 +93,10 @@ const extractData = function(url) {
 
 const getText = function(statement) {
   const promise = new Promise((resolve, reject) => {
+    if (!statement.url.textUrl) {
+      resolve(statement);
+    }
+    
     request(statement.url.textUrl, (err, response, html) => {
       if (err) {
         return reject(err);
@@ -168,7 +172,6 @@ app.get('/scrape', (req, res) => {
       const links = $(`a:contains('More')`);
 
       for (const element in links) {
-        console.log(element);
         if (!(links[element].attribs === undefined)) {
           results.push(host + '/fdsys/' + links[element].attribs.href);
         }
@@ -176,24 +179,26 @@ app.get('/scrape', (req, res) => {
 
       // pop off last url because it is undefined
       // results.pop();
-      // const res = [];
-      // console.log(results);
-      // for (const url of results) {
-      //   res.push(extractData(url))
-      // }
-      // return Promise.all(res);
+      const res = [];
+      for (const url of results) {
+        res.push(extractData(url))
+      }
+
+      return Promise.all(res);
     })
-    .then((statement) => {
-      console.log(statement);
-      return getText(statement);
+    .then((statements) => {
+      console.log('layer 6');
+      // console.log(statements);
+      const res = [];
+      for (const statement of statements) {
+        res.push(getText(statement));
+      }
+
+      return Promise.all(res);
     })
-    .then((statement) => {
-      console.log(statement);
-      data.push(statement);
-      // console.log(data);
-    })
-    .catch((err) => {
-      console.log(err);
+    .then((statements) => {
+      console.log('layer 7');
+      console.log(statements);
     })
     .catch((err) => {
       console.log(err);
