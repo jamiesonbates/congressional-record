@@ -96,7 +96,7 @@ const getText = function(statement) {
     if (!statement.url.textUrl) {
       resolve(statement);
     }
-    
+
     request(statement.url.textUrl, (err, response, html) => {
       if (err) {
         return reject(err);
@@ -177,8 +177,6 @@ app.get('/scrape', (req, res) => {
         }
       }
 
-      // pop off last url because it is undefined
-      // results.pop();
       const res = [];
       for (const url of results) {
         res.push(extractData(url))
@@ -188,7 +186,6 @@ app.get('/scrape', (req, res) => {
     })
     .then((statements) => {
       console.log('layer 6');
-      // console.log(statements);
       const res = [];
       for (const statement of statements) {
         res.push(getText(statement));
@@ -209,4 +206,4 @@ const port = process.env.PORT || 8000;
 
 app.listen(port, () => {
   console.log(`Listening on port ${port}`);
-})
+});
