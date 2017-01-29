@@ -5,6 +5,7 @@
 // const e = express();
 const cheerio = require('cheerio');
 const request = require('request');
+const knex = require('../knex');
 
 // Variables
 // const year = '2011';
@@ -27,7 +28,7 @@ const getHTML = function(url) {
   return promise;
 }
 
-const extractData = function(url) {
+const extractData = function(url, date, year) {
   const promise = new Promise((resolve, reject) => {
     request(url, (err, response, html) => {
       if (err) {
@@ -58,29 +59,23 @@ const extractData = function(url) {
       const speakingCongressMember = $tables.find(`tr td:contains('Speaking Congress Member')`).next().text();
 
       let statement = {
-        statement: {
-          publication_title: publicationTitle,
-          title: title,
-          speaker: speakingCongressMember,
-          date: `${date}, ${year}`,
-          time: time,
-          page_number_range: pageNumberRange,
-          congressional_body: section,
-          congress: congress,
-          text: ''
-        },
-        url: {
-          text: textUrl,
-          pdf: pdf,
-          mods: mods
-        },
-        meta: {
-            collection_category: category,
-            collection: collection,
-            sudoc_class_number: suDocClassNumber,
-            publisher: publisher,
-            sub_type: subType
-        }
+        publication_title: publicationTitle,
+        title: title,
+        speaker: speakingCongressMember,
+        date: `${date}, ${year}`,
+        time: time,
+        page_number_range: pageNumberRange,
+        congressional_body: section,
+        congress: congress,
+        speech_text: '',
+        text_url: textUrl,
+        pdf_url: pdf,
+        mods_url: mods,
+        collection_category: category,
+        collection: collection,
+        sudoc_class_number: suDocClassNumber,
+        publisher: publisher,
+        sub_type: subType
       }
       resolve(statement);
     });
@@ -91,11 +86,11 @@ const extractData = function(url) {
 
 const getText = function(statement) {
   const promise = new Promise((resolve, reject) => {
-    if (!statement.url.text) {
+    if (!statement.text_url) {
       resolve(statement);
     }
 
-    request(statement.url.text, (err, response, html) => {
+    request(statement.text_url, (err, response, html) => {
       if (err) {
         return reject(err);
       }
@@ -104,7 +99,7 @@ const getText = function(statement) {
 
       const text = $('pre').text();
 
-      statement.statement.text = text;
+      statement.speech_text = text;
 
       resolve(statement);
     });
@@ -182,7 +177,7 @@ const scrapeData = function(year, month, date, body) {
 
       const res = [];
       for (const url of results) {
-        res.push(extractData(url))
+        res.push(extractData(url, date, year));
       }
 
       return Promise.all(res);
@@ -198,12 +193,13 @@ const scrapeData = function(year, month, date, body) {
     })
     .then((statements) => {
       console.log('layer 7');
-      console.log(statements);
+      return knex('floor_speeches')
+        .insert(statements);
     })
     .catch((err) => {
       console.log(err);
     })
-});
+};
 
 // const port = process.env.PORT || 8000;
 //
