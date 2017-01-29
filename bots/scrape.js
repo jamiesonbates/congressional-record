@@ -1,20 +1,16 @@
 'use strict';
 
 // Dependencies
-const express = require('express');
-const app = express();
+// const express = require('express');
+// const e = express();
 const cheerio = require('cheerio');
 const request = require('request');
 
 // Variables
-const results = [];
-const data = [];
-const year = '2016';
-const month = 'January';
-const date = 'Tuesday, January 12';
-const body = 'House';
-const host = 'https://www.gpo.gov';
-const basePath = '/fdsys/browse/collection.action?collectionCode=CREC';
+// const year = '2011';
+// const month = 'January';
+// const date = 'Wednesday, January 5';
+// const body = 'Senate';
 
 // Send's request to url and returns promise
 const getHTML = function(url) {
@@ -39,14 +35,16 @@ const extractData = function(url) {
       }
       const $ = cheerio.load(html);
 
+      // Access HTML Table Where Data is Stored
       const $tables = $('table.page-details-budget-metadata-table');
 
-      const title = $('h3.page-title').text();
-
+      // Extract Links
       const textUrl = $tables.find(`a:contains('Text')`).attr('href');
       const pdf = $tables.find(`a:contains('PDF')`).attr('href');
       const mods = $tables.find(`a:contains('MODS')`).attr('href');
 
+      // Extract Meta Data
+      const title = $('h3.page-title').text();
       const category = $tables.find(`tr td:contains('Category')`).next().text();
       const collection = $tables.find(`tr td:contains('Collection')`).next().text();
       const publicationTitle = $tables.find(`tr td:contains('Publication Title')`).next().text().trim().replace(/([\s]{2,})/g, ' ');
@@ -72,7 +70,7 @@ const extractData = function(url) {
           text: ''
         },
         url: {
-          textUrl: textUrl,
+          text: textUrl,
           pdf: pdf,
           mods: mods
         },
@@ -93,11 +91,11 @@ const extractData = function(url) {
 
 const getText = function(statement) {
   const promise = new Promise((resolve, reject) => {
-    if (!statement.url.textUrl) {
+    if (!statement.url.text) {
       resolve(statement);
     }
 
-    request(statement.url.textUrl, (err, response, html) => {
+    request(statement.url.text, (err, response, html) => {
       if (err) {
         return reject(err);
       }
@@ -106,7 +104,7 @@ const getText = function(statement) {
 
       const text = $('pre').text();
 
-      statement.text = text;
+      statement.statement.text = text;
 
       resolve(statement);
     });
@@ -115,7 +113,10 @@ const getText = function(statement) {
   return promise;
 }
 
-app.get('/scrape', (req, res) => {
+// e.get('/scrape', (req, res) => {
+const scrapeData = function(year, month, date, body) {
+  const host = 'https://www.gpo.gov';
+  const basePath = '/fdsys/browse/collection.action?collectionCode=CREC';
   let url = host + basePath;
   let attr;
 
@@ -171,6 +172,8 @@ app.get('/scrape', (req, res) => {
 
       const links = $(`a:contains('More')`);
 
+      const results = [];
+
       for (const element in links) {
         if (!(links[element].attribs === undefined)) {
           results.push(host + '/fdsys/' + links[element].attribs.href);
@@ -202,8 +205,15 @@ app.get('/scrape', (req, res) => {
     })
 });
 
-const port = process.env.PORT || 8000;
+// const port = process.env.PORT || 8000;
+//
+// app.listen(port, () => {
+//   console.log(`Listening on port ${port}`);
+// });
 
-app.listen(port, () => {
-  console.log(`Listening on port ${port}`);
-});
+module.exports = {
+  getHTML,
+  extractData,
+  getText,
+  scrapeData
+}
