@@ -6,6 +6,7 @@
 const cheerio = require('cheerio');
 const request = require('request');
 const knex = require('../knex');
+const moment = require('moment');
 
 // Variables
 // const year = '2011';
@@ -110,6 +111,13 @@ const getText = function(statement) {
 
 // e.get('/scrape', (req, res) => {
 const scrapeData = function(year, month, date, body) {
+  // const year = new Date(Date.now()).getFullYear();
+  // const month = moment(new Date(Date.now())).format('MMMM');
+  // const date = moment(new Date(Date.now())).format('dddd, MMMM D');
+  console.log(year);
+  console.log(month);
+  console.log(date);
+  console.log(body);
   const host = 'https://www.gpo.gov';
   const basePath = '/fdsys/browse/collection.action?collectionCode=CREC';
   let url = host + basePath;
@@ -124,6 +132,7 @@ const scrapeData = function(year, month, date, body) {
       attr = $(`a:contains(${year})`).attr('onclick').slice(12, 119);
 
       url = host + attr;
+      console.log(url);
 
       return getHTML(url);
     })
@@ -135,6 +144,7 @@ const scrapeData = function(year, month, date, body) {
       attr = $(`a:contains(${month})`).attr('onclick').slice(12, 124);
 
       url = host + attr;
+      console.log(url);
 
       return getHTML(url);
     })
@@ -146,6 +156,7 @@ const scrapeData = function(year, month, date, body) {
       attr = $(`a:contains(${date})`).attr('onclick').slice(12, 140);
 
       url = host + attr;
+      console.log(url);
 
       return getHTML(url);
     })
@@ -157,6 +168,7 @@ const scrapeData = function(year, month, date, body) {
       attr = $(`a:contains(${body})`).attr('onclick').slice(12, 170);
 
       url = host + attr;
+      console.log(url);
 
       return getHTML(url);
     })
@@ -200,12 +212,6 @@ const scrapeData = function(year, month, date, body) {
       console.log(err);
     })
 };
-
-// const port = process.env.PORT || 8000;
-//
-// app.listen(port, () => {
-//   console.log(`Listening on port ${port}`);
-// });
 
 module.exports = {
   getHTML,
