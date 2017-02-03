@@ -96,9 +96,21 @@ const getText = function(statement) {
 
       const $ = cheerio.load(html);
 
-      const text = $('pre').text();
+      const rawText = $('pre').text();
 
-      statement.speech_text = text;
+      let dirtyText = rawText.replace(new RegExp('\\n', 'g'), '');
+
+      dirtyText = dirtyText.slice(dirtyText.lastIndexOf('[www.gpo.gov]'));
+
+      dirtyText = dirtyText.replace('[www.gpo.gov]', '');
+
+      dirtyText = dirtyText.replace(new RegExp(/([A-Z][A-Z \'-.]{1,}[A-Z])[ ]/), '');
+
+      dirtyText = dirtyText.replace(new RegExp(/_{2,}/), '');
+
+      dirtyText = dirtyText.trim();
+
+      statement.speech_text = dirtyText;
 
       resolve(statement);
     });
@@ -206,6 +218,7 @@ const scrapeData = function(year, month, date, body) {
       return Promise.all(res);
     })
     .then((statements) => {
+      console.log(statements);
       return knex('floor_speeches')
         .insert(statements);
     })
