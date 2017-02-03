@@ -50,7 +50,6 @@ const extractData = function(url, date, year) {
       const category = $tables.find(`tr td:contains('Category')`).next().text();
       const collection = $tables.find(`tr td:contains('Collection')`).next().text();
       const publicationTitle = $tables.find(`tr td:contains('Publication Title')`).next().text().trim().replace(/([\s]{2,})/g, ' ');
-      const suDocClassNumber = $tables.find(`tr td:contains('SuDoc Class Number')`).next().text();
       const publisher = $tables.find(`tr td:contains('Publisher')`).next().text();
       const pageNumberRange = $tables.find(`tr td:contains('Page Number Range')`).next().text();
       const congress = $tables.find(`tr td:contains('Congress')`).next().text();
@@ -74,7 +73,6 @@ const extractData = function(url, date, year) {
         mods_url: mods,
         collection_category: category,
         collection: collection,
-        sudoc_class_number: suDocClassNumber,
         publisher: publisher,
         sub_type: subType
       }
