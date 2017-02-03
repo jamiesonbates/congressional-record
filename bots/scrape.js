@@ -132,7 +132,6 @@ const scrapeData = function(year, month, date, body) {
       attr = $(`a:contains(${year})`).attr('onclick').slice(12, 119);
 
       url = host + attr;
-      console.log(url);
 
       return getHTML(url);
     })
@@ -144,7 +143,6 @@ const scrapeData = function(year, month, date, body) {
       attr = $(`a:contains(${month})`).attr('onclick').slice(12, 124);
 
       url = host + attr;
-      console.log(url);
 
       return getHTML(url);
     })
@@ -161,7 +159,6 @@ const scrapeData = function(year, month, date, body) {
       attr = $dateAnchor.attr('onclick').slice(12, 140);
 
       url = host + attr;
-      console.log(url);
 
       return getHTML(url);
     })
@@ -203,13 +200,14 @@ const scrapeData = function(year, month, date, body) {
       console.log('layer 6');
       const res = [];
       for (const statement of statements) {
-        res.push(getText(statement));
+        if (statement.speaker) {
+          res.push(getText(statement));
+        }
       }
 
       return Promise.all(res);
     })
     .then((statements) => {
-      console.log('layer 7');
       return knex('floor_speeches')
         .insert(statements);
     })
