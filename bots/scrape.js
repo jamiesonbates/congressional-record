@@ -152,8 +152,13 @@ const scrapeData = function(year, month, date, body) {
       // Scrape 3rd Page - Layer 3
       console.log('layer 3');
       const $ = cheerio.load(html);
+      const $dateAnchor = $(`a:contains(${date})`);
 
-      attr = $(`a:contains(${date})`).attr('onclick').slice(12, 140);
+      if (!$dateAnchor) {
+        throw new Error(`Cannot find ${date}`);
+      }
+
+      attr = $dateAnchor.attr('onclick').slice(12, 140);
 
       url = host + attr;
       console.log(url);
