@@ -108,9 +108,9 @@ const getText = function(statement) {
 
       dirtyText = dirtyText.replace(new RegExp(/_{2,}/), '');
 
-      dirtyText = dirtyText.trim();
+      cleanText = dirtyText.trim();
 
-      statement.speech_text = dirtyText;
+      statement.speech_text = cleanText;
 
       resolve(statement);
     });
@@ -119,11 +119,30 @@ const getText = function(statement) {
   return promise;
 }
 
+const determineDateToScrape = function() {
+  const year = new Date(Date.now()).getFullYear();
+  const month = moment(new Date(Date.now())).format('MMMM');
+  let day = moment(new Date(Date.now())).format('dddd, MMMM D');
+  const date = moment(new Date(Date.now())).format('D');
+  const daysOfWeek = ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+
+  if (day === 'Sunday') {
+    return false;
+  }
+
+  if (day !== 'Monday') {
+    day = daysOfWeek[daysOfWeek.indexOf(day) - 1];
+  }
+
+  if (day === 'Monday') {
+    day = 'Friday';
+  }
+
+  return [year, month, `${day}, ${month} ${date}`];
+}
+
 // e.get('/scrape', (req, res) => {
 const scrapeData = function(year, month, date, body) {
-  // const year = new Date(Date.now()).getFullYear();
-  // const month = moment(new Date(Date.now())).format('MMMM');
-  // const date = moment(new Date(Date.now())).format('dddd, MMMM D');
   console.log(year);
   console.log(month);
   console.log(date);
