@@ -5,10 +5,9 @@ const express = require('express');
 const app = express();
 const CronJob = require('cron').CronJob;
 
-const date = 'Wednesday, February 1';
 // Scrape House
 new CronJob('*/3 * * * * *',
-  scrape.scrapeData('2017', 'February', date, 'House'),
+  scrape.scrapeData('House'),
   null,
   true,
   'America/Los_Angeles'
@@ -16,7 +15,7 @@ new CronJob('*/3 * * * * *',
 
 // Scrape Senate
 new CronJob('*/3 * * * * *',
-  scrape.scrapeData('2017', 'February', date, 'Senate'),
+  scrape.scrapeData('Senate'),
   null,
   true,
   'America/Los_Angeles'

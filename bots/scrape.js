@@ -108,7 +108,7 @@ const getText = function(statement) {
 
       dirtyText = dirtyText.replace(new RegExp(/_{2,}/), '');
 
-      cleanText = dirtyText.trim();
+      const cleanText = dirtyText.trim();
 
       statement.speech_text = cleanText;
 
@@ -122,8 +122,8 @@ const getText = function(statement) {
 const determineDateToScrape = function() {
   const year = new Date(Date.now()).getFullYear();
   const month = moment(new Date(Date.now())).format('MMMM');
-  let day = moment(new Date(Date.now())).format('dddd, MMMM D');
-  const date = moment(new Date(Date.now())).format('D');
+  let day = moment(new Date(Date.now())).format('dddd');
+  let date = moment(new Date(Date.now())).format('D');
   const daysOfWeek = ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 
   if (day === 'Sunday') {
@@ -131,115 +131,162 @@ const determineDateToScrape = function() {
   }
 
   if (day !== 'Monday') {
-    day = daysOfWeek[daysOfWeek.indexOf(day) - 1];
+    const i = daysOfWeek.indexOf(day);
+    const last = daysOfWeek.pop();
+    daysOfWeek.unshift(last);
+    day = daysOfWeek[i];
+
   }
 
   if (day === 'Monday') {
     day = 'Friday';
   }
 
+  date = date - 1;
+
   return [year, month, `${day}, ${month} ${date}`];
 }
 
 // e.get('/scrape', (req, res) => {
-const scrapeData = function(year, month, date, body) {
-  console.log(year);
-  console.log(month);
-  console.log(date);
-  console.log(body);
+const scrapeData = function(body) {
+  const dateInfo = determineDateToScrape();
+  const year = dateInfo[0];
+  const month = dateInfo[1];
+  const date = dateInfo[2];
+  const longDate = `${date}, ${year}`;
+
   const host = 'https://www.gpo.gov';
   const basePath = '/fdsys/browse/collection.action?collectionCode=CREC';
   let url = host + basePath;
   let attr;
 
-  return getHTML(url)
-    .then((html) => {
-      // Scrape 1st Page - Layer 1
-      console.log('layer 1');
-      const $ = cheerio.load(html);
+  const promise = new Promise((resolve, reject) => {
+    return getHTML(url)
+      .then((html) => {
+        // Scrape 1st Page - Layer 1
+        console.log('layer 1');
+        const $ = cheerio.load(html);
 
-      attr = $(`a:contains(${year})`).attr('onclick').slice(12, 119);
+        attr = $(`a:contains(${year})`).attr('onclick').slice(12, 119);
 
-      url = host + attr;
+        url = host + attr;
 
-      return getHTML(url);
-    })
-    .then((html) => {
-      // Scrape 2nd Page - Layer 2
-      console.log('layer 2');
-      const $ = cheerio.load(html);
+        return getHTML(url);
+      })
+      .then((html) => {
+        // Scrape 2nd Page - Layer 2
+        console.log('layer 2');
+        const $ = cheerio.load(html);
 
-      attr = $(`a:contains(${month})`).attr('onclick').slice(12, 124);
+        attr = $(`a:contains(${month})`).attr('onclick').slice(12, 124);
 
-      url = host + attr;
+        url = host + attr;
 
-      return getHTML(url);
-    })
-    .then((html) => {
-      // Scrape 3rd Page - Layer 3
-      console.log('layer 3');
-      const $ = cheerio.load(html);
-      const $dateAnchor = $(`a:contains(${date})`);
+        return getHTML(url);
+      })
+      .then((html) => {
+        // Scrape 3rd Page - Layer 3
+        console.log('layer 3');
+        const $ = cheerio.load(html);
+        const $dateAnchor = $(`a:contains(${date})`);
 
-      if (!$dateAnchor) {
-        throw new Error(`Cannot find ${date}`);
-      }
-
-      attr = $dateAnchor.attr('onclick').slice(12, 140);
-
-      url = host + attr;
-
-      return getHTML(url);
-    })
-    .then((html) => {
-      // Scrape 4th Page - Layer 4
-      console.log('layer 4');
-      const $ = cheerio.load(html);
-
-      attr = $(`a:contains(${body})`).attr('onclick').slice(12, 170);
-
-      url = host + attr;
-      console.log(url);
-
-      return getHTML(url);
-    })
-    .then((html) => {
-      // Scrape 5th Page - Layer 5
-      console.log('layer 5');
-      const $ = cheerio.load(html);
-
-      const links = $(`a:contains('More')`);
-
-      const results = [];
-
-      for (const element in links) {
-        if (!(links[element].attribs === undefined)) {
-          results.push(host + '/fdsys/' + links[element].attribs.href);
+        if (!$dateAnchor) {
+          throw new Error(`Cannot find ${date}`);
         }
-      }
 
-      const res = [];
-      for (const url of results) {
-        res.push(extractData(url, date, year));
-      }
+        attr = $dateAnchor.attr('onclick').slice(12, 140);
 
-      return Promise.all(res);
-    })
-    .then((statements) => {
-      console.log('layer 6');
-      const res = [];
-      for (const statement of statements) {
-        if (statement.speaker) {
-          res.push(getText(statement));
+        url = host + attr;
+
+        return getHTML(url);
+      })
+      .then((html) => {
+        // Scrape 4th Page - Layer 4
+        console.log('layer 4');
+        const $ = cheerio.load(html);
+
+        attr = $(`a:contains(${body})`).attr('onclick').slice(12, 170);
+
+        url = host + attr;
+        console.log(url);
+
+        return getHTML(url);
+      })
+      .then((html) => {
+        // Scrape 5th Page - Layer 5
+        console.log('layer 5');
+        const $ = cheerio.load(html);
+
+        const links = $(`a:contains('More')`);
+
+        const results = [];
+
+        for (const element in links) {
+          if (!(links[element].attribs === undefined)) {
+            results.push(host + '/fdsys/' + links[element].attribs.href);
+          }
         }
+
+        const res = [];
+        for (const url of results) {
+          res.push(extractData(url, date, year));
+        }
+
+        return Promise.all(res);
+      })
+      .then((statements) => {
+        console.log('layer 6');
+        const res = [];
+        for (const statement of statements) {
+          if (statement.speaker) {
+            res.push(getText(statement));
+          }
+        }
+
+        return Promise.all(res);
+      })
+      .then((statements) => {
+        console.log('layer 7');
+        if (statements) {
+          knex('track_scraper')
+            .update('success', true)
+            .where('date', longDate)
+        }
+        return knex('floor_speeches')
+          .insert(statements)
+      })
+      .catch((err) => {
+        console.log(err);
+      })
+    });
+
+  return knex('track_scraper')
+    .where('date', longDate)
+    .where('body', body)
+    .returning('*')
+    .then((trackDate) => {
+      console.log('trackDate = ' + trackDate);
+      if (!trackDate) {
+        return knex('track_scraper')
+          .insert({ date: longDate, success: false, body: body })
+          .returning('*')
+          .then((updatedTrackDate) => {
+            console.log('updatedTrackDate = ' + updatedTrackDate);
+            return promise;
+          })
+          .catch((err) => {
+            console.log(err);
+          });
       }
 
-      return Promise.all(res);
-    })
-    .then((statements) => {
-      console.log(statements);
-      return knex('floor_speeches')
-        .insert(statements);
+      if (trackDate.success) {
+        throw new Error(`Speeches already collected for ${longDate}`);
+      }
+
+      if (!trackDate.success) {
+        console.log('at promise');
+        return promise;
+      }
     })
     .catch((err) => {
       console.log(err);
@@ -250,5 +297,6 @@ module.exports = {
   getHTML,
   extractData,
   getText,
+  determineDateToScrape,
   scrapeData
 }
