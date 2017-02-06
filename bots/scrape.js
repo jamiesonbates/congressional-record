@@ -120,31 +120,57 @@ const getText = function(statement) {
 }
 
 const determineDateToScrape = function() {
-  const year = new Date(Date.now()).getFullYear();
-  const month = moment(new Date(Date.now())).format('MMMM');
+  const daysOfWeek = ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+  const endOfMonth = {
+    'January': 31,
+    'February': 28,
+    'March': 31,
+    'April': 30,
+    'May': 31,
+    'June': 30,
+    'July': 31,
+    'August': 31,
+    'September': 30,
+    'October': 31,
+    'November': 30,
+    'December': 31
+  }
+  let year = new Date(Date.now()).getFullYear();
+  let month = moment(new Date(Date.now())).format('MMMM');
   let day = moment(new Date(Date.now())).format('dddd');
   let date = moment(new Date(Date.now())).format('D');
-  const daysOfWeek = ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 
   if (day === 'Sunday') {
     return false;
   }
+  else if (day === 'Monday') {
+    if (date < 4) {
+      month = moment(new Date(Date.now())).subtract(1, 'months').format('MMMM');
+      date = endOfMonth[month] - (date - 3);
+    }
+    else {
+      date = moment(new Date(Date.now())).subtract(3, 'days').format('D');
+    }
 
-  if (day !== 'Monday') {
+    day = 'Friday';
+
+    return [year, month, `${day}, ${month} ${date}`];
+  }
+  else {
+    if (date === 1) {
+      month = moment(new Date(Date.now())).subtract(1, 'months').format('MMMM');
+      date = endOfMonth[month];
+    }
+    
     const i = daysOfWeek.indexOf(day);
     const last = daysOfWeek.pop();
     daysOfWeek.unshift(last);
     day = daysOfWeek[i];
-    date = date - 1;
+    let date = moment(new Date(Date.now())).subtract(1, 'days').format('D');
+    console.log('date ' + date);
 
+    return [year, month, `${day}, ${month} ${date}`];
   }
-
-  if (day === 'Monday') {
-    day = 'Friday';
-    date = date - 3;
-  }
-
-  return [year, month, `${day}, ${month} ${date}`];
 }
 
 // e.get('/scrape', (req, res) => {
