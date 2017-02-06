@@ -1,18 +1,10 @@
 'use strict';
 
 // Dependencies
-// const express = require('express');
-// const e = express();
 const cheerio = require('cheerio');
 const request = require('request');
 const knex = require('../knex');
 const moment = require('moment');
-
-// Variables
-// const year = '2011';
-// const month = 'January';
-// const date = 'Wednesday, January 5';
-// const body = 'Senate';
 
 // Send's request to url and returns promise
 const getHTML = function(url) {
@@ -178,7 +170,6 @@ const determineDateToScrape = function() {
   }
 }
 
-// e.get('/scrape', (req, res) => {
 const scrapeData = function(body) {
   const dateInfo = determineDateToScrape();
   const year = dateInfo[0];
@@ -192,6 +183,7 @@ const scrapeData = function(body) {
   let url = host + basePath;
   let attr;
 
+  // Consider moving outside of scrapeData function
   const runScraper = function() {
     return new Promise((resolve, reject) => {
       getHTML(url)
@@ -313,7 +305,6 @@ const scrapeData = function(body) {
           .returning('*')
           .then((updatedTrackDate) => {
             const updatedScraperDate = updatedTrackDate[0];
-            console.log('updatedTrackDate = ' + updatedScraperDate);
           })
           .catch((err) => {
             return err;
