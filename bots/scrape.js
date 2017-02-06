@@ -141,10 +141,12 @@ const determineDateToScrape = function() {
   let date = moment(new Date(Date.now())).format('D');
 
   if (day === 'Sunday') {
+    // Return false because scraping on Sunday would be unnecessary
     return false;
   }
   else if (day === 'Monday') {
     if (date < 4) {
+      // Alter month/date if date is the 1st - 3rd of a month and its Monday
       month = moment(new Date(Date.now())).subtract(1, 'months').format('MMMM');
       date = endOfMonth[month] - (date - 3);
     }
@@ -158,16 +160,19 @@ const determineDateToScrape = function() {
   }
   else {
     if (date === 1) {
+      // Alter month/date if date is the first of a given month and not Monday
       month = moment(new Date(Date.now())).subtract(1, 'months').format('MMMM');
       date = endOfMonth[month];
     }
-    
+    else {
+      date = moment(new Date(Date.now())).subtract(1, 'days').format('D');
+    }
+
+    // Determine Day of Week (i.e. 'Tuesday') using pop/unshift algo
     const i = daysOfWeek.indexOf(day);
     const last = daysOfWeek.pop();
     daysOfWeek.unshift(last);
     day = daysOfWeek[i];
-    let date = moment(new Date(Date.now())).subtract(1, 'days').format('D');
-    console.log('date ' + date);
 
     return [year, month, `${day}, ${month} ${date}`];
   }
