@@ -6,6 +6,7 @@ exports.up = function(knex) {
     table.string('date');
     table.boolean('success');
     table.string('body');
+    table.timestamps(true, true)
   });
 }
 

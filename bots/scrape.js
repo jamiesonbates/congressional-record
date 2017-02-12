@@ -275,6 +275,7 @@ const scrapeData = function(body) {
           if (statements) {
             knex('track_scraper')
               .update('success', true)
+              .update('updated_at', Date.now())
               .where('date', longDate)
               .where('body', body)
               .returning('*')

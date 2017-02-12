@@ -20,6 +20,7 @@ exports.up = function(knex) {
     table.text('sudoc_class_number');
     table.text('publisher');
     table.text('sub_type');
+    table.timestamps(true, true)
   });
 }
 
