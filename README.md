@@ -12,4 +12,4 @@ The main problem that still needs to be solved is how to extract the right infor
 * Express.js
 * Request -npm package for making http calls
 * Cheerio -npm package that implements a subset of core jQuery for parsing DOMs
-* Cron -will be used for running jobs continuously when this is put onto server (this will probably change upon implementation)
+* Cron -will be used for running jobs continuously when this is pushed to a server (this will probably change upon implementation)
